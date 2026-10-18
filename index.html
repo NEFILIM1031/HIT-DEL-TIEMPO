@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080914">
+  <meta name="description" content="Elige una fecha entre 2000 y 2026 y descubre la canción que ocupaba el puesto número uno del Billboard Hot 100 esa semana.">
+  <title>Hit del tiempo — La canción #1 de tu fecha</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080914;
+      --panel: rgba(20, 22, 42, .78);
+      --panel-border: rgba(184, 174, 255, .18);
+      --text: #f7f6ff;
+      --muted: #aaa9c4;
+      --purple: #9a7cff;
+      --pink: #ff6eb4;
+      --cyan: #68e5e2;
+      --success: #9df1c2;
+      --danger: #ffb1bf;
+      --radius: 25px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse at 9% 5%, rgba(111, 78, 238, .22), transparent 31rem),
+        radial-gradient(ellipse at 96% 36%, rgba(255, 83, 164, .12), transparent 28rem),
+        radial-gradient(ellipse at 53% 105%, rgba(38, 146, 177, .12), transparent 35rem),
+        var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    button, input { font: inherit; }
+    a { color: inherit; }
+    .page-shell { width: min(1100px, calc(100% - 40px)); margin: 0 auto; }
+    header {
+      min-height: 84px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .brand { display: flex; align-items: center; gap: 11px; text-decoration: none; font-weight: 850; letter-spacing: -.045em; }
+    .brand-mark {
+      width: 37px; height: 37px; display: grid; place-items: center; border-radius: 12px;
+      background: linear-gradient(135deg, var(--purple), var(--pink)); color: #090a16;
+      box-shadow: 0 6px 27px rgba(154,124,255,.25);
+    }
+    .brand-name { font-size: 16px; }
+    .brand-name span { color: #c7baff; }
+    .header-note { color: var(--muted); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+    main { padding: 70px 0 45px; }
+    .intro { text-align: center; max-width: 810px; margin: 0 auto 34px; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px; padding: 8px 13px;
+      border: 1px solid rgba(154,124,255,.32); border-radius: 999px;
+      background: rgba(154,124,255,.08); color: #d4caff;
+      font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase;
+    }
+    .eyebrow-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--pink); box-shadow: 0 0 12px var(--pink); }
+    h1 { font-size: clamp(39px, 7.2vw, 70px); line-height: 1.02; letter-spacing: -.065em; margin: 23px 0 18px; }
+    .gradient-text { background: linear-gradient(100deg, #fff 8%, #c9baff 49%, #ff9dc9 93%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .intro p { margin: 0 auto; max-width: 610px; color: var(--muted); font-size: clamp(15px, 2vw, 17px); }
+    .date-card {
+      max-width: 780px; margin: 0 auto; padding: 23px;
+      border: 1px solid var(--panel-border); border-radius: var(--radius);
+      background: linear-gradient(145deg, rgba(31,32,59,.88), rgba(14,15,30,.88));
+      box-shadow: 0 28px 80px rgba(0,0,0,.23), inset 0 1px rgba(255,255,255,.035);
+      backdrop-filter: blur(16px);
+    }
+    .date-label { display: block; font-weight: 750; font-size: 14px; margin-bottom: 11px; }
+    .form-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; }
+    .date-input-wrap { position: relative; }
+    input[type="date"] {
+      width: 100%; min-height: 54px; color: var(--text); background: rgba(7,8,20,.72);
+      border: 1px solid rgba(193,187,239,.22); border-radius: 15px; padding: 0 15px; outline: none;
+    }
+    input[type="date"]:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(154,124,255,.15); }
+    input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; filter: invert(.85); }
+    .primary-btn {
+      min-height: 54px; padding: 0 22px; border: 0; border-radius: 15px; cursor: pointer;
+      font-weight: 850; color: #100d1b; background: linear-gradient(105deg, #b6a3ff, #ff9bc8);
+      box-shadow: 0 9px 27px rgba(178,139,255,.19); transition: transform .18s ease, filter .18s ease;
+      white-space: nowrap;
+    }
+    .primary-btn:hover { transform: translateY(-2px); filter: brightness(1.07); }
+    .primary-btn:active { transform: translateY(0); }
+    .date-hint { color: #8f8eaa; font-size: 12px; margin: 10px 0 0; }
+    .quick-dates { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 9px; margin: 16px auto 0; }
+    .quick-label { color: #8888a4; font-size: 12px; margin-right: 3px; }
+    .quick-btn {
+      color: #d8d4ef; background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.11);
+      border-radius: 999px; padding: 7px 12px; font-size: 12px; cursor: pointer; transition: .18s ease;
+    }
+    .quick-btn:hover { background: rgba(154,124,255,.12); border-color: rgba(154,124,255,.42); }
+    .result-area { max-width: 900px; margin: 46px auto 0; }
+    .section-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; color: #d3d0ed; font-weight: 750; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; }
+    .section-heading::before { content: ""; width: 23px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--purple), var(--pink)); }
+    .result-card {
+      overflow: hidden; display: grid; grid-template-columns: 300px minmax(0, 1fr);
+      border-radius: 27px; border: 1px solid var(--panel-border);
+      background: linear-gradient(125deg, rgba(24,25,48,.94), rgba(12,13,27,.94));
+      box-shadow: 0 25px 70px rgba(0,0,0,.23);
+    }
+    .art-panel {
+      position: relative; min-height: 345px; display: grid; place-items: center; padding: 27px;
+      overflow: hidden; background: radial-gradient(circle at 48% 42%, rgba(154,124,255,.30), transparent 48%), linear-gradient(150deg, #272148, #101326 72%);
+    }
+    .art-panel::before, .art-panel::after { content: ""; position: absolute; border: 1px solid rgba(255,255,255,.07); border-radius: 50%; width: 330px; height: 330px; }
+    .art-panel::after { width: 390px; height: 390px; }
+    .album-art { width: min(100%, 245px); aspect-ratio: 1; object-fit: cover; border-radius: 15px; z-index: 1; box-shadow: 0 18px 40px rgba(0,0,0,.38); display: none; }
+    .vinyl {
+      z-index: 1; width: 226px; aspect-ratio: 1; border-radius: 50%; position: relative;
+      background: repeating-radial-gradient(circle at center, #171827 0 4px, #25253b 5px 7px, #141524 8px 12px);
+      box-shadow: 0 20px 42px rgba(0,0,0,.45), inset 0 0 25px rgba(0,0,0,.6);
+      animation: slow-spin 20s linear infinite;
+    }
+    .vinyl::before { content: ""; position: absolute; inset: 32%; border-radius: 50%; background: linear-gradient(135deg, #d8bfff, #ff8ec5); box-shadow: 0 0 26px rgba(255,142,197,.23); }
+    .vinyl::after { content: "♪"; position: absolute; inset: 0; display: grid; place-items: center; color: #191226; font-size: 37px; font-weight: 900; }
+    @keyframes slow-spin { to { transform: rotate(360deg); } }
+    .art-caption { position: absolute; bottom: 17px; z-index: 2; color: rgba(255,255,255,.57); font-size: 10px; font-weight: 800; letter-spacing: .18em; }
+    .song-details { padding: clamp(24px, 4vw, 38px); min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+    .chart-pill { align-self: flex-start; display: inline-flex; align-items: center; gap: 7px; border-radius: 999px; padding: 7px 11px; background: rgba(104,229,226,.09); border: 1px solid rgba(104,229,226,.21); color: var(--cyan); font-weight: 800; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+    .chart-pill span { font-size: 15px; }
+    .song-date { color: var(--muted); font-size: 12px; margin-top: 18px; }
+    .song-title { font-size: clamp(28px, 4vw, 42px); line-height: 1.07; letter-spacing: -.045em; margin: 7px 0 8px; overflow-wrap: anywhere; }
+    .artist-name { margin: 0; color: #c1bddb; font-size: 16px; font-weight: 600; }
+    .detail-rule { height: 1px; background: rgba(255,255,255,.09); margin: 23px 0 18px; }
+    .stats { display: flex; flex-wrap: wrap; gap: 26px; }
+    .stat-label { display: block; color: #8988a4; text-transform: uppercase; letter-spacing: .1em; font-size: 9px; font-weight: 800; margin-bottom: 4px; }
+    .stat-value { font-size: 17px; font-weight: 850; }
+    .song-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 25px; }
+    .secondary-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 14px; text-decoration: none; border-radius: 12px; border: 1px solid rgba(255,255,255,.13); background: rgba(255,255,255,.045); font-size: 12px; font-weight: 750; transition: .18s ease; }
+    .secondary-btn:hover { transform: translateY(-1px); border-color: rgba(255,255,255,.32); background: rgba(255,255,255,.08); }
+    .secondary-btn.youtube { border-color: rgba(255,110,180,.32); background: rgba(255,110,180,.08); }
+    .message { max-width: 900px; margin: 15px auto 0; padding: 14px 16px; border: 1px solid rgba(255,255,255,.1); border-radius: 13px; font-size: 13px; color: var(--muted); background: rgba(255,255,255,.035); }
+    .message.error { color: var(--danger); border-color: rgba(255,177,191,.25); background: rgba(255,95,133,.06); }
+    .message[hidden], .result-card[hidden], .message:empty { display: none; }
+    .spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid rgba(255,255,255,.25); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -2px; margin-right: 7px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .method-note { display: grid; grid-template-columns: 32px minmax(0,1fr); gap: 12px; max-width: 780px; margin: 28px auto 0; padding: 17px 19px; border: 1px solid rgba(255,255,255,.075); border-radius: 17px; background: rgba(255,255,255,.025); }
+    .note-icon { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 10px; color: #cfc3ff; background: rgba(154,124,255,.12); }
+    .method-note h2 { margin: 1px 0 4px; font-size: 12px; letter-spacing: .04em; }
+    .method-note p { margin: 0; color: #9291ad; font-size: 12px; }
+    .method-note a { color: #cbbdff; text-underline-offset: 3px; }
+    footer { margin-top: 47px; padding: 23px 0 28px; border-top: 1px solid rgba(255,255,255,.075); color: #7f7e99; font-size: 11px; }
+    .footer-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+    .footer-brand { color: #b7b0d3; font-weight: 800; }
+    button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+    @media (max-width: 700px) {
+      .page-shell { width: min(100% - 28px, 560px); }
+      header { min-height: 70px; }
+      .header-note { display: none; }
+      main { padding-top: 48px; }
+      .date-card { padding: 17px; }
+      .form-row { grid-template-columns: 1fr; }
+      .primary-btn { width: 100%; }
+      .result-area { margin-top: 36px; }
+      .result-card { grid-template-columns: 1fr; }
+      .art-panel { min-height: 245px; }
+      .vinyl { width: 165px; }
+      .album-art { width: min(58%, 190px); }
+      .song-details { padding: 24px 21px 25px; }
+      .song-title { font-size: 34px; }
+      .song-actions > * { flex: 1 1 140px; }
+      .method-note { padding: 14px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header>
+      <a class="brand" href="#inicio" aria-label="Hit del tiempo, inicio">
+        <span class="brand-mark" aria-hidden="true">♫</span>
+        <span class="brand-name">HIT <span>DEL TIEMPO</span></span>
+      </a>
+      <div class="header-note">Tu fecha tiene una banda sonora</div>
+    </header>
+
+    <main id="inicio">
+      <section class="intro" aria-labelledby="main-title">
+        <div class="eyebrow"><span class="eyebrow-dot"></span> Un viaje musical en el tiempo</div>
+        <h1 id="main-title">Cada fecha tiene<br><span class="gradient-text">su propia canción.</span></h1>
+        <p>Elige un día y descubre qué canción estaba en el puesto número uno. Del año 2000 a 2026, una fecha a la vez.</p>
+      </section>
+
+      <section class="date-card" aria-label="Buscar canción por fecha">
+        <form id="date-form">
+          <label class="date-label" for="date-input">¿Qué fecha quieres recordar?</label>
+          <div class="form-row">
+            <div class="date-input-wrap">
+              <input id="date-input" name="date" type="date" min="2000-01-01" max="2026-10-18" value="2026-10-17" required aria-describedby="date-hint">
+            </div>
+            <button class="primary-btn" id="search-button" type="submit">Descubrir canción <span aria-hidden="true">↗</span></button>
+          </div>
+          <p class="date-hint" id="date-hint">Fechas disponibles: 1 de enero de 2000 — 18 de octubre de 2026.</p>
+        </form>
+        <div class="quick-dates" aria-label="Probar fechas populares">
+          <span class="quick-label">Prueba con:</span>
+          <button class="quick-btn" type="button" data-date="2000-01-01">2000</button>
+          <button class="quick-btn" type="button" data-date="2010-07-10">2010</button>
+          <button class="quick-btn" type="button" data-date="2020-03-21">2020</button>
+          <button class="quick-btn" type="button" data-date="2025-06-14">2025</button>
+          <button class="quick-btn" type="button" data-date="2026-10-17">2026</button>
+        </div>
+      </section>
+
+      <section class="result-area" aria-labelledby="result-heading">
+        <div class="section-heading" id="result-heading">La canción de tu fecha</div>
+        <div class="message" id="status-message" role="status" aria-live="polite">Preparando tu viaje musical…</div>
+        <article class="result-card" id="result-card" hidden aria-live="polite">
+          <div class="art-panel">
+            <div class="vinyl" id="fallback-vinyl" aria-hidden="true"></div>
+            <img class="album-art" id="album-art" alt="Portada del sencillo" loading="lazy">
+            <div class="art-caption">SOUNDTRACK OF YOUR LIFE</div>
+          </div>
+          <div class="song-details">
+            <div class="chart-pill"><span aria-hidden="true">✦</span> Número 1 del Hot 100</div>
+            <div class="song-date" id="chart-date">Lista semanal</div>
+            <h2 class="song-title" id="song-title">Cargando canción…</h2>
+            <p class="artist-name" id="artist-name"></p>
+            <div class="detail-rule"></div>
+            <div class="stats">
+              <div><span class="stat-label">Puesto esa semana</span><span class="stat-value">#1</span></div>
+              <div><span class="stat-label">Semanas en lista</span><span class="stat-value" id="weeks-on-chart">—</span></div>
+              <div><span class="stat-label">Pico histórico</span><span class="stat-value" id="peak-position">—</span></div>
+            </div>
+            <div class="song-actions">
+              <a class="secondary-btn youtube" id="youtube-link" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">▶ Escuchar / ver</a>
+              <a class="secondary-btn" id="spotify-link" href="https://open.spotify.com/" target="_blank" rel="noopener noreferrer">♫ Buscar en Spotify</a>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <aside class="method-note" aria-label="Cómo se elige la canción">
+        <div class="note-icon" aria-hidden="true">i</div>
+        <div>
+          <h2>¿Cómo se elige la canción?</h2>
+          <p>Usamos el <em>Billboard Hot 100</em>, una lista semanal de popularidad musical en Estados Unidos. La fecha elegida se relaciona con la edición semanal más reciente de esa semana; por eso no representa necesariamente la canción más escuchada en todo el mundo ni una medición exacta de un solo día. Datos históricos: <a href="https://github.com/mhollingshead/billboard-hot-100" target="_blank" rel="noopener noreferrer">archivo público de Billboard Hot 100</a>. Las portadas se consultan en el catálogo de Apple Music.</p>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      <div class="footer-inner">
+        <span class="footer-brand">♫ HIT DEL TIEMPO</span>
+        <span>Un recuerdo puede empezar con una fecha.</span>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    (() => {
+      "use strict";
+      const DATA_BASE = "https://raw.githubusercontent.com/mhollingshead/billboard-hot-100/main/date/";
+      const APPLE_SEARCH = "https://itunes.apple.com/search?entity=song&limit=8&term=";
+      const MIN_DATE = "2000-01-01";
+      const MAX_DATE = "2026-10-18";
+      const form = document.getElementById("date-form");
+      const dateInput = document.getElementById("date-input");
+      const searchButton = document.getElementById("search-button");
+      const statusMessage = document.getElementById("status-message");
+      const resultCard = document.getElementById("result-card");
+      const songTitle = document.getElementById("song-title");
+      const artistName = document.getElementById("artist-name");
+      const chartDate = document.getElementById("chart-date");
+      const weeksOnChart = document.getElementById("weeks-on-chart");
+      const peakPosition = document.getElementById("peak-position");
+      const albumArt = document.getElementById("album-art");
+      const fallbackVinyl = document.getElementById("fallback-vinyl");
+      const youtubeLink = document.getElementById("youtube-link");
+      const spotifyLink = document.getElementById("spotify-link");
+      let requestNumber = 0;
+
+      dateInput.min = MIN_DATE;
+      dateInput.max = MAX_DATE;
+
+      function isoDate(date) {
+        return date.toISOString().slice(0, 10);
+      }
+
+      function chartDateFor(dateString) {
+        // El archivo registra las ediciones del Hot 100 en sábados: usa el sábado anterior o el mismo día.
+        const chosenDate = new Date(dateString + "T00:00:00Z");
+        const daysSinceSaturday = (chosenDate.getUTCDay() + 1) % 7;
+        chosenDate.setUTCDate(chosenDate.getUTCDate() - daysSinceSaturday);
+        return isoDate(chosenDate);
+      }
+
+      function formatSpanishDate(dateString) {
+        const date = new Date(dateString + "T12:00:00Z");
+        return new Intl.DateTimeFormat("es-CO", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(date);
+      }
+
+      function showMessage(text, isError = false) {
+        statusMessage.hidden = !text;
+        statusMessage.classList.toggle("error", isError);
+        statusMessage.innerHTML = "";
+        if (text === "loading") {
+          const spinner = document.createElement("span");
+          spinner.className = "spinner";
+          spinner.setAttribute("aria-hidden", "true");
+          statusMessage.append(spinner, document.createTextNode("Buscando el número uno de esa semana…"));
+        } else {
+          statusMessage.textContent = text;
+        }
+      }
+
+      async function getChart(dateString, sequence) {
+        let candidate = chartDateFor(dateString);
+        // Si una fecha excepcional no existe en el archivo, retrocede semana a semana hasta encontrar una edición.
+        for (let attempt = 0; attempt < 8; attempt++) {
+          if (sequence !== requestNumber) return null;
+          const response = await fetch(DATA_BASE + candidate + ".json", { headers: { "Accept": "application/json" } });
+          if (response.ok) {
+            const chart = await response.json();
+            if (chart && Array.isArray(chart.data) && chart.data.length) return chart;
+          }
+          if (response.status !== 404 && response.status !== 200) {
+            throw new Error("No fue posible consultar el archivo de música (HTTP " + response.status + ").");
+          }
+          const earlier = new Date(candidate + "T00:00:00Z");
+          earlier.setUTCDate(earlier.getUTCDate() - 7);
+          candidate = isoDate(earlier);
+        }
+        throw new Error("No encontramos una edición de la lista para esa fecha. Prueba con otro día.");
+      }
+
+      async function loadArtwork(song, artist, sequence) {
+        try {
+          const term = encodeURIComponent(song + " " + artist);
+          const response = await fetch(APPLE_SEARCH + term, { headers: { "Accept": "application/json" } });
+          if (!response.ok) return;
+          const result = await response.json();
+          if (sequence !== requestNumber || !Array.isArray(result.results) || result.results.length === 0) return;
+          const cleanSong = song.toLocaleLowerCase();
+          const cleanArtist = artist.toLocaleLowerCase();
+          const match = result.results.find(item =>
+            item.trackName && item.trackName.toLocaleLowerCase() === cleanSong &&
+            item.artistName && (item.artistName.toLocaleLowerCase().includes(cleanArtist) || cleanArtist.includes(item.artistName.toLocaleLowerCase()))
+          ) || result.results.find(item => item.trackName && item.trackName.toLocaleLowerCase() === cleanSong) || result.results[0];
+          if (match.artworkUrl100) {
+            albumArt.src = match.artworkUrl100.replace(/\d+x\d+bb\./, "600x600bb.");
+            albumArt.alt = "Portada disponible para “" + song + "”, de " + artist;
+            albumArt.style.display = "block";
+            fallbackVinyl.style.display = "none";
+          }
+        } catch (_) {
+          // La canción sigue apareciendo aunque el servicio de portadas no esté disponible.
+        }
+      }
+
+      function renderChart(chart, chosenDate, sequence) {
+        const songs = chart.data.slice().sort((a, b) => Number(a.this_week) - Number(b.this_week));
+        const numberOne = songs.find(item => Number(item.this_week) === 1) || songs[0];
+        if (!numberOne) throw new Error("La lista no contiene datos para esa semana.");
+
+        songTitle.textContent = numberOne.song || "Canción no identificada";
+        artistName.textContent = numberOne.artist || "Artista no identificado";
+        chartDate.textContent = "Para la semana de tu fecha · edición del " + formatSpanishDate(chart.date || chartDateFor(chosenDate));
+        weeksOnChart.textContent = Number.isFinite(Number(numberOne.weeks_on_chart)) ? numberOne.weeks_on_chart : "—";
+        peakPosition.textContent = numberOne.peak_position ? "#" + numberOne.peak_position : "—";
+        albumArt.removeAttribute("src");
+        albumArt.style.display = "none";
+        fallbackVinyl.style.display = "block";
+        const query = encodeURIComponent((numberOne.song || "") + " " + (numberOne.artist || ""));
+        youtubeLink.href = "https://www.youtube.com/results?search_query=" + query;
+        spotifyLink.href = "https://open.spotify.com/search/" + query;
+        resultCard.hidden = false;
+        showMessage("Resultado listo para " + formatSpanishDate(chosenDate) + ".");
+        loadArtwork(numberOne.song || "", numberOne.artist || "", sequence);
+      }
+
+      async function lookup(dateString) {
+        const sequence = ++requestNumber;
+        if (!dateString || dateString < MIN_DATE || dateString > MAX_DATE) {
+          resultCard.hidden = true;
+          showMessage("Elige una fecha entre el 1 de enero de 2000 y el 18 de octubre de 2026.", true);
+          return;
+        }
+        searchButton.disabled = true;
+        searchButton.style.opacity = ".72";
+        showMessage("loading");
+        resultCard.hidden = true;
+        try {
+          const chart = await getChart(dateString, sequence);
+          if (!chart || sequence !== requestNumber) return;
+          renderChart(chart, dateString, sequence);
+        } catch (error) {
+          if (sequence !== requestNumber) return;
+          showMessage(error instanceof TypeError ? "No se pudo conectar con el archivo histórico. Revisa tu conexión a internet e inténtalo de nuevo." : (error.message || "Ocurrió un error al buscar la canción."), true);
+        } finally {
+          if (sequence === requestNumber) {
+            searchButton.disabled = false;
+            searchButton.style.opacity = "1";
+          }
+        }
+      }
+
+      form.addEventListener("submit", event => {
+        event.preventDefault();
+        lookup(dateInput.value);
+      });
+
+      document.querySelectorAll("[data-date]").forEach(button => {
+        button.addEventListener("click", () => {
+          dateInput.value = button.dataset.date;
+          lookup(dateInput.value);
+        });
+      });
+
+      // Una primera consulta permite mostrar una canción de ejemplo apenas abre el sitio.
+      lookup(dateInput.value);
+    })();
+  </script>
+</body>
+</html>
